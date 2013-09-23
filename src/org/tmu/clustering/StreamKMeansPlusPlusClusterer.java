@@ -1,19 +1,11 @@
 package org.tmu.clustering;
 
-import org.apache.commons.math3.exception.ConvergenceException;
-import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
-import org.apache.commons.math3.ml.clustering.Cluster;
-import org.apache.commons.math3.ml.clustering.Clusterer;
 import org.apache.commons.math3.ml.clustering.DoublePoint;
-import org.apache.commons.math3.ml.distance.DistanceMeasure;
-import org.apache.commons.math3.ml.distance.EuclideanDistance;
 import org.tmu.util.CSVReader;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -23,12 +15,12 @@ import java.util.List;
  * Time: 2:56 PM
  * To change this template use File | Settings | File Templates.
  */
-public class StreamKMeansPlusPlus{
-    boolean verbose=true;
+public class StreamKMeansPlusPlusClusterer {
+    public boolean verbose=false;
     String path;
     List<ClusterPoint> intermediateClusterPoints=new ArrayList<ClusterPoint>();
 
-    public StreamKMeansPlusPlus(String path){
+    public StreamKMeansPlusPlusClusterer(String path){
         this.path=path;
     }
 
@@ -45,14 +37,19 @@ public class StreamKMeansPlusPlus{
             for(CentroidCluster<DoublePoint> cluster:clusters)
                 intermediateClusterPoints.add(new ClusterPoint(cluster));
             if(verbose)
-                System.out.printf("Chunk number: %,d\n",chunk_number++);
+                System.out.printf(".");
         }while (points.size()>0);
+
+        if(verbose)
+            System.out.println();
 
         List<DoublePoint> centers=new ArrayList<DoublePoint>(intermediateClusterPoints.size());
         for(ClusterPoint cp:intermediateClusterPoints)
             centers.add(new DoublePoint(cp.center));
 
         csvReader.close();
+        if(verbose)
+            System.out.println("The intermediate centers size is: "+centers.size());
         return new MultiKMeansPlusPlus(k,5).cluster(centers);
     }
 }

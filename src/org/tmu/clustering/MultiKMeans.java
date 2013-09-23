@@ -2,7 +2,10 @@ package org.tmu.clustering;
 
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
-import org.apache.commons.math3.ml.clustering.*;
+import org.apache.commons.math3.ml.clustering.CentroidCluster;
+import org.apache.commons.math3.ml.clustering.Clusterer;
+import org.apache.commons.math3.ml.clustering.DoublePoint;
+import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.EuclideanDistance;
 
@@ -16,21 +19,21 @@ import java.util.List;
  * Time: 12:51 PM
  * To change this template use File | Settings | File Templates.
  */
-public class MultiKMeansPlusPlus extends Clusterer<DoublePoint> {
+public class MultiKMeans extends Clusterer<DoublePoint> {
     int k;
     int iterations=7;
     public boolean verbose=false;
 
-    protected MultiKMeansPlusPlus(DistanceMeasure measure) {
+    protected MultiKMeans(DistanceMeasure measure) {
         super(measure);
     }
 
-    public MultiKMeansPlusPlus(int k){
+    public MultiKMeans(int k){
         super(new EuclideanDistance());
         this.k=k;
     }
 
-    public MultiKMeansPlusPlus(int k, int iterations){
+    public MultiKMeans(int k, int iterations){
         super(new EuclideanDistance());
         this.iterations=iterations;
         this.k=k;
@@ -43,8 +46,8 @@ public class MultiKMeansPlusPlus extends Clusterer<DoublePoint> {
 
         for(int i=0;i<iterations;i++){
             int max_iterations=Math.max((int) Math.log(points.size()) * i, 1);
-            KMeansPlusPlusClusterer<DoublePoint> kMeansPlusPlusClusterer=new KMeansPlusPlusClusterer<DoublePoint>(k,max_iterations);
-            List<CentroidCluster<DoublePoint>> clusters=kMeansPlusPlusClusterer.cluster(points);
+            KMeansClusterer<DoublePoint> kMeansClusterer=new KMeansClusterer<DoublePoint>(k,max_iterations);
+            List<CentroidCluster<DoublePoint>> clusters=kMeansClusterer.cluster(points);
             double sse=Evaluator.computeSSE(clusters);
             if(bestSSE>sse){
                 bestClusters=clusters;
