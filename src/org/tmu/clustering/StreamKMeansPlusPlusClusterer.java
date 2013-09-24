@@ -30,7 +30,7 @@ public class StreamKMeansPlusPlusClusterer {
         int chunk_number=0;
         do{
             points=csvReader.readNextPoints(chunk_size);
-            if(points.size()==0)
+            if(points.size()==0||points.size()<k)
                 break;
             MultiKMeansPlusPlus multiKMeansPlusPlus=new MultiKMeansPlusPlus(k,chunk_iters);
             List<CentroidCluster<DoublePoint>> clusters=multiKMeansPlusPlus.cluster(points);

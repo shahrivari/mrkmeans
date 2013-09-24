@@ -45,7 +45,7 @@ public class MultiKMeans extends Clusterer<DoublePoint> {
         double bestSSE=Double.MAX_VALUE;
 
         for(int i=0;i<iterations;i++){
-            int max_iterations=Math.max((int) Math.log(points.size()) * i, 1);
+            int max_iterations=Math.max((int) Math.log(points.size()) * iterations, 1);
             KMeansClusterer<DoublePoint> kMeansClusterer=new KMeansClusterer<DoublePoint>(k,max_iterations);
             List<CentroidCluster<DoublePoint>> clusters=kMeansClusterer.cluster(points);
             double sse=Evaluator.computeSSE(clusters);
