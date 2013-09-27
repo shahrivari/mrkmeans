@@ -32,7 +32,7 @@ public class StreamKMeansPlusPlusClusterer {
             points=csvReader.readNextPoints(chunk_size);
             if(points.size()==0||points.size()<k)
                 break;
-            MultiKMeansPlusPlus multiKMeansPlusPlus=new MultiKMeansPlusPlus(k,chunk_iters);
+            MultiKMeansPlusPlus multiKMeansPlusPlus=new MultiKMeansPlusPlus(k,chunk_iters,1);
             List<CentroidCluster<DoublePoint>> clusters=multiKMeansPlusPlus.cluster(points);
             for(CentroidCluster<DoublePoint> cluster:clusters)
                 intermediateClusterPoints.add(new ClusterPoint(cluster));
@@ -50,6 +50,6 @@ public class StreamKMeansPlusPlusClusterer {
         csvReader.close();
         if(verbose)
             System.out.println("The intermediate centers size is: "+centers.size());
-        return new MultiKMeansPlusPlus(k,5).cluster(centers);
+        return new MultiKMeansPlusPlus(k,40,3).cluster(centers);
     }
 }

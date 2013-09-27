@@ -31,9 +31,9 @@ public class Main {
         options.addOption("plus", false, "use kmeans++.");
         options.addOption("standard", false, "use standard kmeans.");
         options.addOption("stream", false, "use stream kmeans++.");
-        options.addOption("t", "tries", true, "try x times and return the best. Also denotes the per chunk iteration for the stream case.");
+        options.addOption("t", "tries", true, "try x times and return the best.");
         options.addOption("p", "print", true, "print the final centers.");
-        options.addOption("m", "max", true, "the max iterations.");
+        options.addOption("m", "max", true, "the max iterations. Also denotes the per chunk iteration for the stream case.");
         options.addOption("c", "chunk", true, "the chunk size.");
         options.addOption("v", "verbose", false, "be verbose.");
 
@@ -41,7 +41,7 @@ public class Main {
 
         String input_path = "";
         int k=0;
-        int tries=5;
+        int tries=3;
         int chunk_size=1000;
         int max_iterations=40;
         boolean verbose=false;
@@ -98,7 +98,7 @@ public class Main {
                     System.out.println("Using the standard k-means algorithm.");
                     if(line.hasOption("t")){
                         System.out.printf("Will try %d times!\n",tries);
-                        MultiKMeans multiKMeans=new MultiKMeans(k,tries);
+                        MultiKMeans multiKMeans=new MultiKMeans(k,max_iterations,tries);
                         if(verbose)
                             multiKMeans.verbose=true;
                         clusters=multiKMeans.cluster(points);
@@ -114,7 +114,7 @@ public class Main {
                     StreamKMeansPlusPlusClusterer streamKMeansPlusPlus=new StreamKMeansPlusPlusClusterer(input_path);
                     if(verbose)
                         streamKMeansPlusPlus.verbose=true;
-                    clusters=streamKMeansPlusPlus.cluster(k,chunk_size,tries);
+                    clusters=streamKMeansPlusPlus.cluster(k,chunk_size,max_iterations);
                 }
                 else { //kmeans++
                     System.out.println("Reading the whole dataset....");
@@ -125,7 +125,7 @@ public class Main {
                     System.out.println("Using the k-means++ algorithm.");
                     if(line.hasOption("t")){
                         System.out.printf("Will try %d times!\n",tries);
-                        MultiKMeansPlusPlus multiKMeansPlusPlus=new MultiKMeansPlusPlus(k,tries);
+                        MultiKMeansPlusPlus multiKMeansPlusPlus=new MultiKMeansPlusPlus(k,max_iterations,tries);
                         if(verbose)
                             multiKMeansPlusPlus.verbose=true;
                         clusters=multiKMeansPlusPlus.cluster(points);
