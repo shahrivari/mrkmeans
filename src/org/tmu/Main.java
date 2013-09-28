@@ -32,7 +32,7 @@ public class Main {
         options.addOption("standard", false, "use standard kmeans.");
         options.addOption("stream", false, "use stream kmeans++.");
         options.addOption("t", "tries", true, "try x times and return the best.");
-        options.addOption("p", "print", true, "print the final centers.");
+        options.addOption("p", "print", false, "print the final centers.");
         options.addOption("m", "max", true, "the max iterations. Also denotes the per chunk iteration for the stream case.");
         options.addOption("c", "chunk", true, "the chunk size.");
         options.addOption("v", "verbose", false, "be verbose.");
@@ -58,6 +58,10 @@ public class Main {
 
             if(line.hasOption("m")){
                 max_iterations=Integer.parseInt(line.getOptionValue("m"));
+            }
+
+            if(line.hasOption("p")){
+                print=true;
             }
 
             if(line.hasOption("c")){
@@ -108,13 +112,13 @@ public class Main {
                         clusters=kmeans.cluster(points);
                     }
                 }else if(line.hasOption("stream")) { //stream kmeans++
+                    if(!line.hasOption("t"))
+                        tries=1;
                     System.out.println("Using the stream k-means++ algorithm.");
-                    System.out.println("The chunk size is: "+chunk_size);
-                    System.out.println("tries per chunk is: "+tries);
                     StreamKMeansPlusPlusClusterer streamKMeansPlusPlus=new StreamKMeansPlusPlusClusterer(input_path);
                     if(verbose)
                         streamKMeansPlusPlus.verbose=true;
-                    clusters=streamKMeansPlusPlus.cluster(k,chunk_size,max_iterations);
+                    clusters=streamKMeansPlusPlus.cluster(k,chunk_size,max_iterations,tries);
                 }
                 else { //kmeans++
                     System.out.println("Reading the whole dataset....");

@@ -24,7 +24,12 @@ public class StreamKMeansPlusPlusClusterer {
         this.path=path;
     }
 
-    public List<CentroidCluster<DoublePoint>> cluster(int k,int chunk_size, int chunk_iters) throws IOException {
+    public List<CentroidCluster<DoublePoint>> cluster(int k,int chunk_size, int chunk_iters, int tries) throws IOException {
+        if(verbose){
+            System.out.println("The chunk size is: "+chunk_size);
+            System.out.println("Iterations per chunk is: "+chunk_iters);
+            System.out.println("tries per chunk is: "+tries);
+        }
         CSVReader csvReader=new CSVReader(path);
         List<DoublePoint> points;
         int chunk_number=0;
@@ -32,7 +37,7 @@ public class StreamKMeansPlusPlusClusterer {
             points=csvReader.readNextPoints(chunk_size);
             if(points.size()==0||points.size()<k)
                 break;
-            MultiKMeansPlusPlus multiKMeansPlusPlus=new MultiKMeansPlusPlus(k,chunk_iters,1);
+            MultiKMeansPlusPlus multiKMeansPlusPlus=new MultiKMeansPlusPlus(k,chunk_iters,tries);
             List<CentroidCluster<DoublePoint>> clusters=multiKMeansPlusPlus.cluster(points);
             for(CentroidCluster<DoublePoint> cluster:clusters)
                 intermediateClusterPoints.add(new ClusterPoint(cluster));
@@ -50,6 +55,8 @@ public class StreamKMeansPlusPlusClusterer {
         csvReader.close();
         if(verbose)
             System.out.println("The intermediate centers size is: "+centers.size());
-        return new MultiKMeansPlusPlus(k,40,3).cluster(centers);
+        MultiKMeansPlusPlus last=new MultiKMeansPlusPlus(k,(int)Math.log(centers.size())*2,3);
+        last.verbose=verbose;
+        return last.cluster(centers);
     }
 }
