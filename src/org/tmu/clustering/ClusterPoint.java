@@ -11,14 +11,14 @@ import org.apache.commons.math3.ml.distance.DistanceMeasure;
  * Time: 2:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ClusterPoint{
+public class ClusterPoint {
     int count;
     double sse;
-    double [] center;
+    double[] center;
 
-    public ClusterPoint(CentroidCluster<DoublePoint> cluster){
-        count=cluster.getPoints().size();
-        center=cluster.getCenter().getPoint();
-        sse=Evaluator.computeSSEofCluster(cluster);
+    public ClusterPoint(CentroidCluster<DoublePoint> cluster) {
+        count = cluster.getPoints().size();
+        center = cluster.getCenter().getPoint();
+        sse = Evaluator.computeSSEofCluster(cluster);
     }
 }

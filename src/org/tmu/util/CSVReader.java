@@ -35,7 +35,7 @@ public class CSVReader {
         reader = new BufferedReader(fileReader);
     }
 
-    private AtomicLong lineNumber=new AtomicLong(0);
+    private AtomicLong lineNumber = new AtomicLong(0);
 
     private String readNextNonEmptyLine() throws IOException {
         String line = "";
@@ -49,33 +49,33 @@ public class CSVReader {
     }
 
     public double[] ReadNextDoubleVector() throws IOException {
-        while (true){
-        String line = readNextNonEmptyLine();
-        if (line == null) return null;
+        while (true) {
+            String line = readNextNonEmptyLine();
+            if (line == null) return null;
 
-        //String[] tokens = line.split("\\s*(;|,|\\s)\\s*");
-        //String[] tokens = line.split("\\s|,|;");
-        String[] tokens= StringUtils.split(line," ,;\t");
+            //String[] tokens = line.split("\\s*(;|,|\\s)\\s*");
+            //String[] tokens = line.split("\\s|,|;");
+            String[] tokens = StringUtils.split(line, " ,;\t");
 
-        double[] point = new double[tokens.length];
+            double[] point = new double[tokens.length];
 
-        for (int i = 0; i < point.length; i++)
-            try {
-                point[i] = Double.parseDouble(tokens[i]);
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-                System.out.println("Error reading line: " + lineNumber);
-                continue;
-            }
+            for (int i = 0; i < point.length; i++)
+                try {
+                    point[i] = Double.parseDouble(tokens[i]);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                    System.out.println("Error reading line: " + lineNumber);
+                    continue;
+                }
 
-        return point;
+            return point;
         }
     }
 
     public List<DoublePoint> readNextPoints(int max_count) throws IOException {
-        List<DoublePoint> points=new ArrayList<DoublePoint>(max_count);
+        List<DoublePoint> points = new ArrayList<DoublePoint>(max_count);
         int point_size = -1;
-        for(int i=0;i<max_count;i++){
+        for (int i = 0; i < max_count; i++) {
             double[] vec = ReadNextDoubleVector();
             if (vec == null)
                 break;
@@ -103,7 +103,7 @@ public class CSVReader {
 
     public static List<DoublePoint> readAllPointsFromFile(String path) throws IOException {
         CSVReader csvReader = new CSVReader(path);
-        List<DoublePoint> points=new ArrayList<DoublePoint>(1024);
+        List<DoublePoint> points = new ArrayList<DoublePoint>(1024);
         int point_size = -1;
         int i = 0;
         while (true) {

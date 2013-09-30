@@ -65,7 +65,7 @@ public class Evaluator {
                 }
                 sse += best_distance * best_distance;
             }
-            points=csvReader.readNextPoints(1000);
+            points = csvReader.readNextPoints(1000);
         }
         csvReader.close();
         return sse;
