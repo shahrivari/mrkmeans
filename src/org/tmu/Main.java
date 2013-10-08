@@ -14,6 +14,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.tmu.clustering.*;
 import org.tmu.util.CSVReader;
+import org.tmu.util.GaussianPointGenerator;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,6 +38,13 @@ public class Main extends Configured implements Tool {
     static boolean print = false;
 
     public static void main(String[] args) throws IOException {
+        GaussianPointGenerator gen=new GaussianPointGenerator(20);
+        for(int i=0;i<100000;i++){
+            DoublePoint point=gen.nextPoint();
+            for(int j=0;j<point.getPoint().length;j++)
+                System.out.printf("%f",point.getPoint()[j]);
+            System.out.println();
+        }
         //parsing command line
         // create the command line parser
         CommandLineParser parser = new BasicParser();
