@@ -48,6 +48,17 @@ public class CSVReader {
         return line;
     }
 
+    public static DoublePoint ReadFromString(String line){
+        if (line == null) return null;
+        String[] tokens = StringUtils.split(line, " ,;\t");
+        double[] point = new double[tokens.length];
+
+        for (int i = 0; i < point.length; i++)
+            point[i] = Double.parseDouble(tokens[i]);
+
+        return new DoublePoint(point);
+    }
+
     public double[] ReadNextDoubleVector() throws IOException {
         while (true) {
             String line = readNextNonEmptyLine();
