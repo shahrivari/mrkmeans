@@ -7,6 +7,7 @@ import org.apache.hadoop.io.WritableComparable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,7 +20,11 @@ public class PointWritable implements WritableComparable {
     DoublePoint point;
 
     PointWritable(DoublePoint p) {
-        this.point = point;
+        this.point = p;
+    }
+
+    PointWritable(double [] arr) {
+        this.point = new DoublePoint(arr);
     }
 
     private PointWritable() {

@@ -71,6 +71,27 @@ public class Evaluator {
         return sse;
     }
 
+    public static double computeSSEofCenters(List<DoublePoint> centers, String file_path) throws IOException {
+        double sse = 0;
+        EuclideanDistance euclideanDistance = new EuclideanDistance();
+        CSVReader csvReader = new CSVReader(file_path);
+        List<DoublePoint> points = csvReader.readNextPoints(1000);
+        while (points.size() > 0) {
+            for (DoublePoint point : points) {
+                double best_distance = Double.MAX_VALUE;
+                for (DoublePoint center : centers) {
+                    double distance = euclideanDistance.compute(center.getPoint(), point.getPoint());
+                    if (distance < best_distance)
+                        best_distance = distance;
+                }
+                sse += best_distance * best_distance;
+            }
+            points = csvReader.readNextPoints(1000);
+        }
+        csvReader.close();
+        return sse;
+    }
+
 
     public static double computeSSEofCluster(CentroidCluster<DoublePoint> cluster) {
         double sse = 0;
@@ -98,5 +119,17 @@ public class Evaluator {
 
         return icd;
     }
+
+    public static double computeICDofCenters(List<DoublePoint> centers) {
+        double icd = 0;
+        EuclideanDistance euclideanDistance = new EuclideanDistance();
+
+        for (int i = 0; i < centers.size(); i++)
+            for (int j = i + 1; j < centers.size(); j++)
+                icd += euclideanDistance.compute(centers.get(i).getPoint(), centers.get(j).getPoint());
+
+        return icd;
+    }
+
 
 }

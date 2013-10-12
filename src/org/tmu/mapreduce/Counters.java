@@ -11,5 +11,6 @@ public enum  Counters {
     EMPTY_LINE,
     BAD_POINT,
     GOOD_POINT,
-    SSE
+    SSE,
+    INTERMEDIATE_CENTERS
 }
