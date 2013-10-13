@@ -30,5 +30,27 @@ public class IOUtil {
         return PointToString(point.getPoint());
     }
 
+    public static String PointIoCompcatString(double [] point)
+    {
+        StringBuilder builder=new StringBuilder();
+        //DecimalFormat threeDec = new DecimalFormat("0.000");
+        for(int i=0;i<point.length;i++){
+            //builder.append(threeDec.format(elements[i])).append(",");
+            //some dirty code to convert double to string with 4 precision
+            String s=Double.toString(point[i]);
+            int dot_place=s.indexOf('.');
+            if(dot_place+5<s.length())
+                s=s.substring(0,dot_place+5);
+            builder.append(s).append(",");
+        }
+        builder.deleteCharAt(builder.length()-1);
+        return builder.toString();
+    }
+
+    public static String PointIoCompcatString(DoublePoint point){
+        return PointIoCompcatString(point.getPoint());
+    }
+
+
 
 }

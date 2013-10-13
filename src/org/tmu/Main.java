@@ -20,6 +20,8 @@ import org.tmu.mapreduce.MRKMeansMapper;
 import org.tmu.mapreduce.MRKMeansReducer;
 import org.tmu.mapreduce.PointWritable;
 import org.tmu.util.CSVReader;
+import org.tmu.util.GaussianPointGenerator;
+import org.tmu.util.IOUtil;
 
 import java.util.List;
 
@@ -42,13 +44,13 @@ public class Main extends Configured implements Tool {
     static boolean print = false;
 
     public static void main(String[] args) throws Exception {
-//        GaussianPointGenerator gen=new GaussianPointGenerator(20);
-//        for(int i=0;i<100000;i++){
-//            DoublePoint point=gen.nextPoint();
-//            for(int j=0;j<point.getPoint().length;j++)
-//                System.out.printf("%f",point.getPoint()[j]);
-//            System.out.println();
-//        }
+        GaussianPointGenerator gen=new GaussianPointGenerator(5,20,100);
+        for(int i=0;i<1000000;i++){
+            DoublePoint point=gen.nextPoint();
+            //System.out.println(IOUtil.PointIoCompcatString(point));
+        }
+
+        System.exit(0);
         //parsing command line
         // create the command line parser
         CommandLineParser parser = new BasicParser();
