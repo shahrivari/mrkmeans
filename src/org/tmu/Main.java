@@ -44,9 +44,9 @@ public class Main extends Configured implements Tool {
     static boolean print = false;
 
     public static void main(String[] args) throws Exception {
-        GaussianPointGenerator gen=new GaussianPointGenerator(5,20,100);
-        for(int i=0;i<1000000;i++){
-            DoublePoint point=gen.nextPoint();
+        GaussianPointGenerator gen = new GaussianPointGenerator(5, 20, 100);
+        for (int i = 0; i < 1000000; i++) {
+            DoublePoint point = gen.nextPoint();
             //System.out.println(IOUtil.PointIoCompcatString(point));
         }
 
@@ -61,8 +61,8 @@ public class Main extends Configured implements Tool {
         options.addOption("i", "input", true, "the input file name.");
         options.addOption("o", "output", true, "the output path.");
         options.addOption("k", "k", true, "the number of clusters.");
-        options.addOption("plus", false, "use kmeans++.");
-        options.addOption("standard", false, "use standard kmeans.");
+        options.addOption("kmeanspp", false, "use kmeans++.");
+        options.addOption("kmeans", false, "use standard kmeans.");
         options.addOption("stream", false, "use stream kmeans++.");
         options.addOption("mapreduce", false, "use Hadoop ;p");
         options.addOption("evaluate", true, "Evaluate the clustering using teh centers in the file.");
@@ -71,6 +71,9 @@ public class Main extends Configured implements Tool {
         options.addOption("m", "max", true, "the max iterations. Also denotes the per chunk iteration for the stream case.");
         options.addOption("c", "chunk", true, "the chunk size.");
         options.addOption("v", "verbose", false, "be verbose.");
+        options.addOption("sse", false, "print sse and icd. works only on local run.");
+
+
 
         HelpFormatter formatter = new HelpFormatter();
 
@@ -100,32 +103,22 @@ public class Main extends Configured implements Tool {
                 verbose = true;
             }
 
-            if (line.hasOption("p")) {
-                print = true;
-            }
 
             if (line.hasOption("o")) {
                 output_path = line.getOptionValue("o");
             }
 
-            if (!line.hasOption("i")) {
-                System.out.println("An input file must be given.");
-                formatter.printHelp("mrk-means", options);
-                System.exit(-1);
-            } else {
-                input_path = line.getOptionValue("i");
+            //started
+            long t0 = System.nanoTime();
 
-                long t0 = System.nanoTime();
-
-                if (line.hasOption("evaluate")){
-
-                    List<DoublePoint> centers=CSVReader.readAllPointsFromFile(line.getOptionValue("evaluate"));
-                    double sse=Evaluator.computeSSEofCenters(centers, input_path);
-                    double icd=Evaluator.computeICDofCenters(centers);
-                    System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
-                    System.out.println("SSE: "+sse);
-                    System.out.println("ICD: "+icd);
-                    System.exit(0);
+            //standard kmeans
+            if (line.hasOption("kmeans")) {
+                if (!line.hasOption("i")) {
+                    System.out.println("An input file must be given!");
+                    formatter.printHelp("mrk-means", options);
+                    System.exit(-1);
+                } else {
+                    input_path = line.getOptionValue("i");
                 }
 
                 if (!line.hasOption("k")) {
@@ -136,46 +129,56 @@ public class Main extends Configured implements Tool {
                     k = Integer.parseInt(line.getOptionValue("k"));
                 }
 
-                if (line.hasOption("standard")) { //standard kmeans
-                    System.out.println("Reading the whole dataset....");
-                    List<DoublePoint> points = CSVReader.readAllPointsFromFile(input_path);
-                    System.out.printf("read %,d ponits.\n", points.size());
-                    System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
+                System.out.println("Reading the whole dataset....");
+                List<DoublePoint> points = CSVReader.readAllPointsFromFile(input_path);
+                System.out.printf("read %,d ponits.\n", points.size());
+                System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
 
-                    System.out.println("Using the standard k-means algorithm.");
-                    if (line.hasOption("t")) {
-                        System.out.printf("Will try %d times!\n", tries);
-                        MultiKMeans multiKMeans = new MultiKMeans(k, max_iterations, tries);
-                        if (verbose)
-                            multiKMeans.verbose = true;
-                        clusters = multiKMeans.cluster(points);
-                    } else {
-                        System.out.printf("Max iterations is %d!\n", max_iterations);
-                        KMeansClusterer kmeans = new KMeansClusterer(k, max_iterations);
-                        clusters = kmeans.cluster(points);
-                    }
-                    System.exit(0);
-                }
-
-                if (line.hasOption("stream")) { //stream kmeans++
-                    if (!line.hasOption("t"))
-                        tries = 1;
-                    System.out.println("Using the stream k-means++ algorithm.");
-                    StreamKMeansPlusPlusClusterer streamKMeansPlusPlus = new StreamKMeansPlusPlusClusterer(input_path);
+                System.out.println("Using the standard k-means algorithm.");
+                if (line.hasOption("t")) {
+                    System.out.printf("Will try %d times!\n", tries);
+                    MultiKMeans multiKMeans = new MultiKMeans(k, max_iterations, tries);
                     if (verbose)
-                        streamKMeansPlusPlus.verbose = true;
-                    clusters = streamKMeansPlusPlus.cluster(k, chunk_size, max_iterations, tries);
-                    System.exit(0);
-                }
-                if (line.hasOption("mapreduce")) { //stream kmeans++
-                    if (!line.hasOption("t"))
-                        tries = 1;
-                    System.out.println("Using MapReduce.");
-                    clusters=null;
-                    System.exit(ToolRunner.run(null, new Main(), args));
+                        multiKMeans.verbose = true;
+                    clusters = multiKMeans.cluster(points);
+                } else {
+                    System.out.printf("Max iterations is %d!\n", max_iterations);
+                    KMeansClusterer kmeans = new KMeansClusterer(k, max_iterations);
+                    clusters = kmeans.cluster(points);
                 }
 
-                //kmeans++
+                if (print) {
+                    for (CentroidCluster<DoublePoint> center : clusters)
+                        System.out.println(center.getCenter());
+                }
+
+                if (line.hasOption("sse")) {
+                    System.out.println("Evaluating clusters...");
+                    System.out.printf("ICD is: %g\n", Evaluator.computeICD(clusters));
+                    System.out.printf("SSE is: %g\n", Evaluator.computeSSE(clusters, input_path));
+                }
+
+                System.exit(0);
+            }
+
+            if (line.hasOption("kmeans++")) { //standard kmeans++
+
+                if (!line.hasOption("i")) {
+                    System.out.println("An input file must be given!");
+                    formatter.printHelp("mrk-means", options);
+                    System.exit(-1);
+                } else {
+                    input_path = line.getOptionValue("i");
+                }
+
+                if (!line.hasOption("k")) {
+                    System.out.println("Number of clusters must be given.");
+                    formatter.printHelp("mrk-means", options);
+                    System.exit(-1);
+                } else {
+                    k = Integer.parseInt(line.getOptionValue("k"));
+                }
+
                 System.out.println("Reading the whole dataset....");
                 List<DoublePoint> points = CSVReader.readAllPointsFromFile(input_path);
                 System.out.printf("read %,d ponits.\n", points.size());
@@ -194,20 +197,119 @@ public class Main extends Configured implements Tool {
                     clusters = kmeans.cluster(points);
                 }
 
-
                 System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
+                if (print) {
+                    for (CentroidCluster<DoublePoint> center : clusters)
+                        System.out.println(center.getCenter());
+                }
+                if (line.hasOption("sse")) {
+                    System.out.println("Evaluating clusters...");
+                    System.out.printf("ICD is: %g\n", Evaluator.computeICD(clusters));
+                    System.out.printf("SSE is: %g\n", Evaluator.computeSSE(clusters, input_path));
+                }
+
+            }
+
+
+            if (line.hasOption("stream")) { //stream kmeans++
+                if (!line.hasOption("t"))
+                    tries = 1;
+                if (!line.hasOption("i")) {
+                    System.out.println("An input file must be given!");
+                    formatter.printHelp("mrk-means", options);
+                    System.exit(-1);
+                } else {
+                    input_path = line.getOptionValue("i");
+                }
+
+                if (!line.hasOption("k")) {
+                    System.out.println("Number of clusters must be given.");
+                    formatter.printHelp("mrk-means", options);
+                    System.exit(-1);
+                } else {
+                    k = Integer.parseInt(line.getOptionValue("k"));
+                }
+
+                if (!line.hasOption("c")) {
+                    System.out.println("Chunk size must be given.");
+                    formatter.printHelp("mrk-means", options);
+                    System.exit(-1);
+                } else {
+                    chunk_size = Integer.parseInt(line.getOptionValue("c"));
+                }
+
+                System.out.println("Using the stream k-means++ algorithm.");
+                StreamKMeansPlusPlusClusterer streamKMeansPlusPlus = new StreamKMeansPlusPlusClusterer(input_path);
+                if (verbose)
+                    streamKMeansPlusPlus.verbose = true;
+                clusters = streamKMeansPlusPlus.cluster(k, chunk_size, max_iterations, tries);
 
                 if (print) {
                     for (CentroidCluster<DoublePoint> center : clusters)
                         System.out.println(center.getCenter());
                 }
 
-                if (verbose) {
+                if (line.hasOption("sse")) {
                     System.out.println("Evaluating clusters...");
                     System.out.printf("ICD is: %g\n", Evaluator.computeICD(clusters));
                     System.out.printf("SSE is: %g\n", Evaluator.computeSSE(clusters, input_path));
                 }
+
+                System.exit(0);
             }
+
+            //mapreduce
+            if (line.hasOption("mapreduce")) { //stream kmeans++
+                System.out.println("Using MapReduce.");
+                if (!line.hasOption("t"))
+                    tries = 1;
+
+                if (!line.hasOption("i")) {
+                    System.out.println("An input file must be given!");
+                    formatter.printHelp("mrk-means", options);
+                    System.exit(-1);
+                } else {
+                    input_path = line.getOptionValue("i");
+                }
+
+                if (!line.hasOption("k")) {
+                    System.out.println("Number of clusters must be given.");
+                    formatter.printHelp("mrk-means", options);
+                    System.exit(-1);
+                } else {
+                    k = Integer.parseInt(line.getOptionValue("k"));
+                }
+
+                if (!line.hasOption("c")) {
+                    System.out.println("Chunk size must be given.");
+                    formatter.printHelp("mrk-means", options);
+                    System.exit(-1);
+                } else {
+                    chunk_size = Integer.parseInt(line.getOptionValue("c"));
+                }
+
+                clusters = null;
+                System.exit(ToolRunner.run(null, new Main(), args));
+            }
+
+
+            if (line.hasOption("evaluate")) {
+
+                List<DoublePoint> centers = CSVReader.readAllPointsFromFile(line.getOptionValue("evaluate"));
+                double sse = Evaluator.computeSSEofCenters(centers, input_path);
+                double icd = Evaluator.computeICDofCenters(centers);
+                System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
+                System.out.println("SSE: " + sse);
+                System.out.println("ICD: " + icd);
+                System.exit(0);
+            }
+
+
+//                if (verbose) {
+//                    System.out.println("Evaluating clusters...");
+//                    System.out.printf("ICD is: %g\n", Evaluator.computeICD(clusters));
+//                    System.out.printf("SSE is: %g\n", Evaluator.computeSSE(clusters, input_path));
+//                }
 
 
         } catch (org.apache.commons.cli.ParseException exp) {
@@ -237,9 +339,9 @@ public class Main extends Configured implements Tool {
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
         job.getConfiguration().setInt("ClusterCount", k);
-        job.getConfiguration().setInt("ChunkSize",chunk_size);
-        job.getConfiguration().setInt("Iterations",max_iterations);
-        job.getConfiguration().set("mapred.output.compress","FALSE");
+        job.getConfiguration().setInt("ChunkSize", chunk_size);
+        job.getConfiguration().setInt("Iterations", max_iterations);
+        job.getConfiguration().set("mapred.output.compress", "FALSE");
 
         FileInputFormat.addInputPath(job, inDir);
         job.setInputFormatClass(org.apache.hadoop.mapreduce.lib.input.TextInputFormat.class);
