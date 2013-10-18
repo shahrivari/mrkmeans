@@ -20,6 +20,8 @@ import java.util.List;
  */
 public class Evaluator {
 
+    static public boolean verbose=false;
+
     public static double computeSSE(List<CentroidCluster<DoublePoint>> clusters) {
         double sse = 0;
         EuclideanDistance euclideanDistance = new EuclideanDistance();
@@ -66,8 +68,12 @@ public class Evaluator {
                 sse += best_distance * best_distance;
             }
             points = csvReader.readNextPoints(1000);
+            if(verbose)
+                System.out.print(".");
         }
         csvReader.close();
+        if(verbose)
+            System.out.println();
         return sse;
     }
 
@@ -87,8 +93,12 @@ public class Evaluator {
                 sse += best_distance * best_distance;
             }
             points = csvReader.readNextPoints(1000);
+            if(verbose)
+                System.out.print(".");
         }
         csvReader.close();
+        if(verbose)
+            System.out.println();
         return sse;
     }
 
