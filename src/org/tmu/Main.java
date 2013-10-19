@@ -23,6 +23,7 @@ import org.tmu.util.CSVReader;
 import org.tmu.util.GaussianPointGenerator;
 import org.tmu.util.IOUtil;
 
+import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.List;
 
@@ -200,6 +201,8 @@ public class Main extends Configured implements Tool {
 
 
             if (line.hasOption("stream")) { //stream kmeans++
+                System.out.println("Using the stream k-means++ algorithm.");
+
                 if (!line.hasOption("t"))
                     tries = 1;
                 if (!line.hasOption("m"))
@@ -214,7 +217,13 @@ public class Main extends Configured implements Tool {
                 if (!line.hasOption("c"))
                     exit("Chunk size must be given.");
 
-                System.out.println("Using the stream k-means++ algorithm.");
+                System.out.println("Options:");
+                System.out.println("\tk: "+k);
+                System.out.println("\ttries per chunk: "+tries);
+                System.out.println("\tmax iterations per chunk: "+ max);
+                System.out.println("\tinput: "+ input_path);
+                System.out.println("\toutput: "+ output_path);
+
                 StreamKMeansPlusPlusClusterer streamKMeansPlusPlus = new StreamKMeansPlusPlusClusterer(input_path);
                 if (verbose)
                     streamKMeansPlusPlus.verbose = true;
@@ -255,7 +264,7 @@ public class Main extends Configured implements Tool {
 
 
             if (line.hasOption("evaluate")) {
-
+                System.out.println("Evaluating against datatset: "+input_path);
                 List<DoublePoint> centers = CSVReader.readAllPointsFromFile(line.getOptionValue("evaluate"));
                 double sse = Evaluator.computeSSEofCenters(centers, input_path);
                 double icd = Evaluator.computeICDofCenters(centers);
@@ -285,15 +294,23 @@ public class Main extends Configured implements Tool {
                 if(!line.hasOption("o"))
                     exit("Output pasth must be given.");
 
-                FileWriter writer=new FileWriter(output_path);
+                System.out.printf("Generating %,d items in %,d clusters with max dimension of %,d ....\n", n, k, max);
+
+                BufferedWriter writer=new BufferedWriter(new FileWriter(output_path),4096*1024);
+
+
 
                 GaussianPointGenerator gen = new GaussianPointGenerator(k,d, max);
+                System.out.println("Centers:");
+                for(double[] center:gen.means)
+                    System.out.println(IOUtil.PointToCompactString(new DoublePoint(center)));
                 for (int i = 0; i < n; i++) {
                     DoublePoint point = gen.nextPoint();
-                    System.out.print(IOUtil.PointIoCompcatString(point)+"\n");
+                    writer.write(IOUtil.PointToCompactString(point)+"\n");
                 }
 
                 writer.close();
+                System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
                 System.exit(0);
             }
 

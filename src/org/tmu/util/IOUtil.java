@@ -2,8 +2,6 @@ package org.tmu.util;
 
 import org.apache.commons.math3.ml.clustering.DoublePoint;
 
-import java.util.Arrays;
-
 /**
  * Created with IntelliJ IDEA.
  * User: Saeed
@@ -30,7 +28,7 @@ public class IOUtil {
         return PointToString(point.getPoint());
     }
 
-    public static String PointIoCompcatString(double [] point)
+    public static String VectorToCompactString(double[] point)
     {
         StringBuilder builder=new StringBuilder();
         //DecimalFormat threeDec = new DecimalFormat("0.000");
@@ -47,8 +45,8 @@ public class IOUtil {
         return builder.toString();
     }
 
-    public static String PointIoCompcatString(DoublePoint point){
-        return PointIoCompcatString(point.getPoint());
+    public static String PointToCompactString(DoublePoint point){
+        return VectorToCompactString(point.getPoint());
     }
 
 

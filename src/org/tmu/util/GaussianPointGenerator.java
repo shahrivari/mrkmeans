@@ -12,7 +12,7 @@ import org.apache.commons.math3.random.*;
  * To change this template use File | Settings | File Templates.
  */
 public class GaussianPointGenerator {
-    double[][] means;
+    public double[][] means;
     int seed=12345;
     int d=15;
     double len=50;
