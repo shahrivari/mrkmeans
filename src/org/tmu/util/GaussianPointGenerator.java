@@ -4,6 +4,12 @@ import org.apache.commons.math3.ml.clustering.DoublePoint;
 import org.apache.commons.math3.ml.distance.EuclideanDistance;
 import org.apache.commons.math3.random.*;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Saeed
@@ -60,7 +66,7 @@ public class GaussianPointGenerator {
         return  randvec.nextVector();
     }
 
-    public DoublePoint nextPoint(){
+    synchronized public DoublePoint nextPoint(){
         double[] mean;
         if(means.length==1)
             mean=means[0];
@@ -71,5 +77,63 @@ public class GaussianPointGenerator {
         double dis=distance.compute(mean,point);
         sse+=dis*dis;
         return new DoublePoint(point);
+    }
+
+    public static void parallelGenerate(String out_path, int k, int d, long n, int max_val) throws IOException, InterruptedException {
+        final GaussianPointGenerator generator=new GaussianPointGenerator(k,d,max_val);
+        final AtomicLong remaining=new AtomicLong(n);
+        final ReentrantLock lock=new ReentrantLock();
+        final BufferedWriter writer=new BufferedWriter(new FileWriter(out_path),4096*1024);
+
+        Thread[] threads=new Thread[Math.max(Runtime.getRuntime().availableProcessors()/2,4)];
+        for(int i=0;i<threads.length;i++){
+            threads[i]=new Thread(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            StringBuilder builder=new StringBuilder(32*1024);
+                            while (remaining.get()>0){
+                                remaining.decrementAndGet();
+                                DoublePoint point=generator.nextPoint();
+                                builder.append(IOUtil.PointToCompactString(point));
+                                builder.append('\n');
+                                if(builder.length()>32*1024){
+                                    lock.lock();
+                                    try {
+                                        writer.write(builder.toString());
+                                        remaining.get();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                                        lock.unlock();
+                                        System.exit(0);
+                                    }
+                                    builder.setLength(0);
+                                    lock.unlock();
+                                }
+                            }
+
+                            if (builder.length()>0){
+                                lock.lock();
+                                try {
+                                    writer.write(builder.toString());
+                                } catch (IOException e) {
+                                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                                    lock.unlock();
+                                    System.exit(0);
+                                }
+                                builder.setLength(0);
+                                lock.unlock();
+                            }
+                        }
+                    }
+            );
+        }
+
+        for (int i=0;i<threads.length;i++)
+            threads[i].start();
+
+        for (int i=0;i<threads.length;i++)
+            threads[i].join();
+        writer.close();
     }
 }

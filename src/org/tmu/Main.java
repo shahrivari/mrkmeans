@@ -21,10 +21,7 @@ import org.tmu.mapreduce.MRKMeansReducer;
 import org.tmu.mapreduce.PointWritable;
 import org.tmu.util.CSVReader;
 import org.tmu.util.GaussianPointGenerator;
-import org.tmu.util.IOUtil;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.util.List;
 
 /**
@@ -296,20 +293,20 @@ public class Main extends Configured implements Tool {
 
                 System.out.printf("Generating %,d items in %,d clusters with max dimension of %,d ....\n", n, k, max);
 
-                BufferedWriter writer=new BufferedWriter(new FileWriter(output_path),4096*1024);
-
-
-
-                GaussianPointGenerator gen = new GaussianPointGenerator(k,d, max);
-                System.out.println("Centers:");
-                for(double[] center:gen.means)
-                    System.out.println(IOUtil.PointToCompactString(new DoublePoint(center)));
-                for (int i = 0; i < n; i++) {
-                    DoublePoint point = gen.nextPoint();
-                    writer.write(IOUtil.PointToCompactString(point)+"\n");
-                }
-
-                writer.close();
+//                BufferedWriter writer=new BufferedWriter(new FileWriter(output_path),4096*1024);
+//
+//                GaussianPointGenerator gen = new GaussianPointGenerator(k,d, max);
+//                System.out.println("Centers:");
+//                for(double[] center:gen.means)
+//                    System.out.println(IOUtil.PointToCompactString(new DoublePoint(center)));
+//                for (int i = 0; i < n; i++) {
+//                    DoublePoint point = gen.nextPoint();
+//                    IOUtil.PointToCompactString(point);
+//                    //writer.write(IOUtil.PointToCompactString(point)+"\n");
+//                }
+//
+//                writer.close();
+                GaussianPointGenerator.parallelGenerate(output_path, k, d, n, max);
                 System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
                 System.exit(0);
             }
