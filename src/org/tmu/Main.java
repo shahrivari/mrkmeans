@@ -289,7 +289,7 @@ public class Main extends Configured implements Tool {
                     exit("Number of clusters must be given.");
 
                 if(!line.hasOption("o"))
-                    exit("Output pasth must be given.");
+                    exit("Output path must be given.");
 
                 System.out.printf("Generating %,d items in %,d clusters with max dimension of %,d ....\n", n, k, max);
 
