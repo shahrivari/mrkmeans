@@ -57,7 +57,7 @@ public class Main extends Configured implements Tool {
         options.addOption("stream", false, "use stream kmeans++.");
         options.addOption("mapreduce", false, "use Hadoop ;p");
         options.addOption("generate", false, "generate random data.");
-        options.addOption("evaluate", true, "Evaluate the clustering using teh centers in the file.");
+        options.addOption("evaluate", true, "Evaluate the clustering using the centers in the file.");
         options.addOption("i", "input", true, "the input file name.");
         options.addOption("o", "output", true, "the output path.");
         options.addOption("k", "k", true, "the number of clusters.");
@@ -130,6 +130,9 @@ public class Main extends Configured implements Tool {
                     clusters = kmeans.cluster(points);
                 }
 
+                System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
+                t0=System.nanoTime();
+
                 if (line.hasOption("p")) {
                     for (CentroidCluster<DoublePoint> center : clusters)
                         System.out.println(center.getCenter());
@@ -141,6 +144,7 @@ public class Main extends Configured implements Tool {
                     System.out.printf("SSE is: %g\n", Evaluator.computeSSE(clusters, input_path));
                 }
 
+                System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
                 System.exit(0);
             }
 
@@ -160,7 +164,7 @@ public class Main extends Configured implements Tool {
 
                 System.out.println("Reading the whole dataset....");
                 List<DoublePoint> points = CSVReader.readAllPointsFromFile(input_path);
-                System.out.printf("read %,d ponits.\n", points.size());
+                System.out.printf("read %,d points.\n", points.size());
                 System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
 
                 t0=System.nanoTime();
@@ -179,11 +183,6 @@ public class Main extends Configured implements Tool {
 
                 System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
                 if (print) {
-                    for (CentroidCluster<DoublePoint> center : clusters)
-                        System.out.println(center.getCenter());
-                }
-
-                if (line.hasOption("p")) {
                     for (CentroidCluster<DoublePoint> center : clusters)
                         System.out.println(center.getCenter());
                 }
