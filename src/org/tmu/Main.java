@@ -116,8 +116,9 @@ public class Main extends Configured implements Tool {
                 System.out.println("Reading the whole dataset....");
                 List<DoublePoint> points = CSVReader.readAllPointsFromFile(input_path);
                 System.out.printf("read %,d ponits.\n", points.size());
-                System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
+                System.out.printf("I/O Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
 
+                System.out.println("Using the k-means algorithm.");
                 if (line.hasOption("t")) {
                     System.out.printf("Will try %d times!\n", tries);
                     MultiKMeans multiKMeans = new MultiKMeans(k, max, tries);
@@ -130,7 +131,7 @@ public class Main extends Configured implements Tool {
                     clusters = kmeans.cluster(points);
                 }
 
-                System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
+                System.out.printf("Algorithm Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
                 t0=System.nanoTime();
 
                 if (line.hasOption("p")) {
@@ -144,7 +145,7 @@ public class Main extends Configured implements Tool {
                     System.out.printf("SSE is: %g\n", Evaluator.computeSSE(clusters, input_path));
                 }
 
-                System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
+                System.out.printf("Evaluation Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
                 System.exit(0);
             }
 
@@ -165,9 +166,9 @@ public class Main extends Configured implements Tool {
                 System.out.println("Reading the whole dataset....");
                 List<DoublePoint> points = CSVReader.readAllPointsFromFile(input_path);
                 System.out.printf("read %,d points.\n", points.size());
-                System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
+                System.out.printf("I/O Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
 
-                t0=System.nanoTime();
+                //t0=System.nanoTime();
                 System.out.println("Using the k-means++ algorithm.");
                 if (line.hasOption("t")) {
                     System.out.printf("Will try %d times!\n", tries);
@@ -181,7 +182,7 @@ public class Main extends Configured implements Tool {
                     clusters = kmeans.cluster(points);
                 }
 
-                System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
+                System.out.printf("Algorithm Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
                 if (print) {
                     for (CentroidCluster<DoublePoint> center : clusters)
                         System.out.println(center.getCenter());
@@ -225,7 +226,7 @@ public class Main extends Configured implements Tool {
                     streamKMeansPlusPlus.verbose = true;
                 clusters = streamKMeansPlusPlus.cluster(k, chunk_size, max, tries);
 
-                System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
+                System.out.printf("Algorithm Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
                 t0=System.nanoTime();
 
                 if (line.hasOption("p")) {
