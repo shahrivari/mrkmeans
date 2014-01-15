@@ -31,27 +31,22 @@ public class GaussianPointGenerator {
     RandomGenerator rg = new JDKRandomGenerator();
     GaussianRandomGenerator rawGenerator = new GaussianRandomGenerator(rg);
 
-    public GaussianPointGenerator(int k,int d,int max_val){
+    public GaussianPointGenerator(int k,int d,int max_val,double std){
         this.d=d;
         this.len=max_val;
         means=new double[k][d];
         //random_data.reSeed(seed);
 
         for(int i=0;i<k;i++){
-//            boolean pass=true;
-//            do{
-//                means[i]=randomPoint(d,len);
-//                for(int j=0;j<i;j++)
-//                    if(distance.compute(means[j],means[i])<2*std)
-//                        pass=false;
-//            }while (!pass);
             means[i]=randomPoint(d,len);
         }
 
+        this.std=std;
         std_arr=new double[d];
         for(int i=0;i<std_arr.length;i++)
             std_arr[i]=std;
     }
+
 
 
     private double[] randomPoint(int d,double max){
@@ -79,8 +74,8 @@ public class GaussianPointGenerator {
         return new DoublePoint(point);
     }
 
-    public static void parallelGenerate(String out_path, int k, int d, long n, int max_val) throws IOException, InterruptedException {
-        final GaussianPointGenerator generator=new GaussianPointGenerator(k,d,max_val);
+    public static void parallelGenerate(String out_path, int k, int d, long n, int max_val,double std) throws IOException, InterruptedException {
+        final GaussianPointGenerator generator=new GaussianPointGenerator(k,d,max_val,std);
         final AtomicLong remaining=new AtomicLong(n);
         final ReentrantLock lock=new ReentrantLock();
         final BufferedWriter writer=new BufferedWriter(new FileWriter(out_path),4096*1024);

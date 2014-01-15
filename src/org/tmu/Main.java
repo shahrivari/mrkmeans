@@ -36,7 +36,7 @@ public class Main extends Configured implements Tool {
     static String input_path = "";
     static String output_path = "";
     static int k = 0;
-    static int tries = 3;
+    static int tries = 1;
     static int chunk_size = 1000;
     static int max = 40;
     static boolean verbose = false;
@@ -67,6 +67,7 @@ public class Main extends Configured implements Tool {
         options.addOption("c", "chunk", true, "the chunk size.");
         options.addOption("d", "dimension", true, "number of dimensions of data (for generating only)");
         options.addOption("n",  true, "number of items (for generating only)");
+        options.addOption("s", "std", true, "std of gaussian distribution (for generating only)");
         options.addOption("v", "verbose", false, "be verbose.");
         options.addOption("sse", false, "print sse and icd. works only on local run.");
 
@@ -274,6 +275,7 @@ public class Main extends Configured implements Tool {
             if(line.hasOption("generate")){
                 int n=10000;
                 int d=5;
+                double std=1.0;
 
                 if (!line.hasOption("n"))
                     exit("Number of items  must be given.");
@@ -291,6 +293,9 @@ public class Main extends Configured implements Tool {
                 if(!line.hasOption("o"))
                     exit("Output path must be given.");
 
+                if(line.hasOption("s"))
+                    std=Double.parseDouble(line.getOptionValue("s"));
+
                 System.out.printf("Generating %,d items in %,d clusters with max dimension of %,d ....\n", n, k, max);
 
 //                BufferedWriter writer=new BufferedWriter(new FileWriter(output_path),4096*1024);
@@ -306,7 +311,7 @@ public class Main extends Configured implements Tool {
 //                }
 //
 //                writer.close();
-                GaussianPointGenerator.parallelGenerate(output_path, k, d, n, max);
+                GaussianPointGenerator.parallelGenerate(output_path, k, d, n, max,std);
                 System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
                 System.exit(0);
             }
