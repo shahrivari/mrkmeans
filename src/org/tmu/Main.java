@@ -68,6 +68,7 @@ public class Main extends Configured implements Tool {
         options.addOption("d", "dimension", true, "number of dimensions of data (for generating only)");
         options.addOption("n",  true, "number of items (for generating only)");
         options.addOption("s", "std", true, "std of gaussian distribution (for generating only)");
+        options.addOption("seed", true, "random seed (for generating only)");
         options.addOption("v", "verbose", false, "be verbose.");
         options.addOption("sse", false, "print sse and icd. works only on local run.");
 
@@ -276,6 +277,7 @@ public class Main extends Configured implements Tool {
                 int n=10000;
                 int d=5;
                 double std=1.0;
+                long seed=0;
 
                 if (!line.hasOption("n"))
                     exit("Number of items  must be given.");
@@ -296,7 +298,17 @@ public class Main extends Configured implements Tool {
                 if(line.hasOption("s"))
                     std=Double.parseDouble(line.getOptionValue("s"));
 
-                System.out.printf("Generating %,d items in %,d clusters with max dimension of %,d ....\n", n, k, max);
+                if(line.hasOption("seed"))
+                    seed=Long.parseLong(line.getOptionValue("seed"));
+
+                System.out.println("Settings:");
+                System.out.println("\t items:"+n);
+                System.out.println("\t clusters:"+k);
+                System.out.println("\t dimensions:"+d);
+                System.out.println("\t max val:"+max);
+                System.out.println("\t std:"+std);
+                System.out.println("\t seed:"+seed);
+                System.out.printf("Generating ....\n", n, k, max);
 
 //                BufferedWriter writer=new BufferedWriter(new FileWriter(output_path),4096*1024);
 //
@@ -311,7 +323,7 @@ public class Main extends Configured implements Tool {
 //                }
 //
 //                writer.close();
-                GaussianPointGenerator.parallelGenerate(output_path, k, d, n, max,std);
+                GaussianPointGenerator.parallelGenerate(output_path, k, d, n, max,std,seed);
                 System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
                 System.exit(0);
             }

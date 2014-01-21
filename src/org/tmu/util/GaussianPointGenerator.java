@@ -19,7 +19,6 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class GaussianPointGenerator {
     public double[][] means;
-    int seed=12345;
     int d=15;
     double len=50;
     double std =1.0;
@@ -35,8 +34,6 @@ public class GaussianPointGenerator {
         this.d=d;
         this.len=max_val;
         means=new double[k][d];
-        //random_data.reSeed(seed);
-
         for(int i=0;i<k;i++){
             means[i]=randomPoint(d,len);
         }
@@ -46,6 +43,17 @@ public class GaussianPointGenerator {
         for(int i=0;i<std_arr.length;i++)
             std_arr[i]=std;
     }
+
+    public void reseed(long seed){
+        random_data.reSeed(seed);
+        rg.setSeed(seed);
+        means=new double[means.length][d];
+        for(int i=0;i<means.length;i++){
+            means[i]=randomPoint(d,len);
+        }
+
+    }
+
 
 
 
@@ -74,8 +82,10 @@ public class GaussianPointGenerator {
         return new DoublePoint(point);
     }
 
-    public static void parallelGenerate(String out_path, int k, int d, long n, int max_val,double std) throws IOException, InterruptedException {
+    public static void parallelGenerate(String out_path, int k, int d, long n, int max_val,double std, long seed) throws IOException, InterruptedException {
         final GaussianPointGenerator generator=new GaussianPointGenerator(k,d,max_val,std);
+        if(seed!=0)
+            generator.reseed(seed);
         final AtomicLong remaining=new AtomicLong(n);
         final ReentrantLock lock=new ReentrantLock();
         final BufferedWriter writer=new BufferedWriter(new FileWriter(out_path),4096*1024);
