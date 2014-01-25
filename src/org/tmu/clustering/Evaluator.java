@@ -55,7 +55,7 @@ public class Evaluator {
         double sse = 0;
         EuclideanDistance euclideanDistance = new EuclideanDistance();
         CSVReader csvReader = new CSVReader(file_path);
-        List<DoublePoint> points = csvReader.readNextPoints(1000);
+        List<DoublePoint> points = csvReader.readNextPoints(10000);
         while (points.size() > 0) {
             for (DoublePoint point : points) {
                 double best_distance = Double.MAX_VALUE;
@@ -67,7 +67,7 @@ public class Evaluator {
                 }
                 sse += best_distance * best_distance;
             }
-            points = csvReader.readNextPoints(1000);
+            points = csvReader.readNextPoints(10000);
             if(verbose)
                 System.out.print(".");
         }
@@ -81,7 +81,7 @@ public class Evaluator {
         double sse = 0;
         EuclideanDistance euclideanDistance = new EuclideanDistance();
         CSVReader csvReader = new CSVReader(file_path);
-        List<DoublePoint> points = csvReader.readNextPoints(1000);
+        List<DoublePoint> points = csvReader.readNextPoints(10000);
         while (points.size() > 0) {
             for (DoublePoint point : points) {
                 double best_distance = Double.MAX_VALUE;
@@ -92,7 +92,7 @@ public class Evaluator {
                 }
                 sse += best_distance * best_distance;
             }
-            points = csvReader.readNextPoints(1000);
+            points = csvReader.readNextPoints(10000);
             if(verbose)
                 System.out.print(".");
         }
