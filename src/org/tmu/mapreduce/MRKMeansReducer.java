@@ -50,6 +50,8 @@ public class MRKMeansReducer extends Reducer<IntWritable, PointWritable,Text,Tex
             FSDataOutputStream stream=fs.create(out,true);
             BufferedWriter writer = new BufferedWriter( new OutputStreamWriter( stream, "UTF-8" ) );
 
+            System.out.println("Saving intermediate centers....");
+
             for(PointWritable p:values){
                 centers.add(p.point);
                 context.getCounter(Counters.INTERMEDIATE_CENTERS).increment(1);
@@ -58,11 +60,15 @@ public class MRKMeansReducer extends Reducer<IntWritable, PointWritable,Text,Tex
 
             writer.close();
 
+            System.out.println("Begining final clustering....");
+
             MultiKMeansPlusPlus last_kmeanspp = new MultiKMeansPlusPlus(k, (int) Math.log(centers.size()) * 2, 3);
             last_kmeanspp.verbose=true;
             List<CentroidCluster<DoublePoint>> clusters=last_kmeanspp.cluster(centers);
             for(CentroidCluster<DoublePoint> cluster: clusters)
                 context.write(new Text(IOUtil.PointToString(cluster.getCenter().getPoint())),new Text(""));
+
+            System.out.println("Final clustering Done!");
 
             return;
         }

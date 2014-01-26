@@ -345,7 +345,7 @@ public class Main extends Configured implements Tool {
     @Override
     public int run(String[] strings) throws Exception {
         Configuration conf = getConf();
-        Job job = new Job(conf, "MRSUB-" + new Path(input_path).getName() + "-" + k);
+        Job job = new Job(conf, "MRKMEANS-" + new Path(input_path).getName() + "-" + k);
         final Path inDir = new Path(input_path);
         if (output_path.isEmpty()) {
             System.out.println("Must define an output path!");
