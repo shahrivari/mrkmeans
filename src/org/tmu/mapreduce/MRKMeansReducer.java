@@ -59,6 +59,7 @@ public class MRKMeansReducer extends Reducer<IntWritable, PointWritable,Text,Tex
             writer.close();
 
             MultiKMeansPlusPlus last_kmeanspp = new MultiKMeansPlusPlus(k, (int) Math.log(centers.size()) * 2, 3);
+            last_kmeanspp.verbose=true;
             List<CentroidCluster<DoublePoint>> clusters=last_kmeanspp.cluster(centers);
             for(CentroidCluster<DoublePoint> cluster: clusters)
                 context.write(new Text(IOUtil.PointToString(cluster.getCenter().getPoint())),new Text(""));
