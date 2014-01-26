@@ -44,6 +44,7 @@ public class MRKMeansReducer extends Reducer<IntWritable, PointWritable,Text,Tex
         //The intermediate centers
         if(key.get()==1){
             double sse=0;
+            long t0=System.nanoTime();
 
             Path out=new Path(context.getConfiguration().get("mapred.output.dir")+"/centers.txt");
             FileSystem fs=FileSystem.get(context.getConfiguration());
@@ -60,6 +61,9 @@ public class MRKMeansReducer extends Reducer<IntWritable, PointWritable,Text,Tex
 
             writer.close();
 
+            System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
+            t0=System.nanoTime();
+
             System.out.println("Begining final clustering....");
 
             MultiKMeansPlusPlus last_kmeanspp = new MultiKMeansPlusPlus(k, (int) Math.log(centers.size()) * 2, 3);
@@ -68,7 +72,7 @@ public class MRKMeansReducer extends Reducer<IntWritable, PointWritable,Text,Tex
             for(CentroidCluster<DoublePoint> cluster: clusters)
                 context.write(new Text(IOUtil.PointToString(cluster.getCenter().getPoint())),new Text(""));
 
-            System.out.println("Final clustering Done!");
+            System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
 
             return;
         }
