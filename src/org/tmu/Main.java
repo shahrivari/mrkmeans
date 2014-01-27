@@ -364,6 +364,8 @@ public class Main extends Configured implements Tool {
         job.getConfiguration().setInt("ChunkSize", chunk_size);
         job.getConfiguration().setInt("Iterations", max);
         job.getConfiguration().set("mapred.output.compress", "FALSE");
+        long milliSeconds = 1000*60*30;
+        conf.setLong("mapred.task.timeout", milliSeconds);
 
         FileInputFormat.addInputPath(job, inDir);
         job.setInputFormatClass(org.apache.hadoop.mapreduce.lib.input.TextInputFormat.class);

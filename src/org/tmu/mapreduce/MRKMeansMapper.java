@@ -76,4 +76,14 @@ public class MRKMeansMapper extends Mapper<LongWritable, Text, IntWritable , Poi
         }
     }
 
+    @Override
+    protected void cleanup(Context context) throws IOException, InterruptedException {
+        if(chunk.size()>=k){
+            KMeansPlusPlusClusterer<DoublePoint> kmeanspp=new KMeansPlusPlusClusterer<DoublePoint>(k,iterations,new EuclideanDistance());
+            List<CentroidCluster<DoublePoint>> clusters=kmeanspp.cluster(chunk);
+            chunk.clear();
+            for(CentroidCluster<DoublePoint> cluster: clusters)
+                context.write(new IntWritable(1), new PointWritable(cluster.getCenter().getPoint()));
+        }
+    }
 }
