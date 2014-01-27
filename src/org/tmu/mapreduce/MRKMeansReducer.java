@@ -55,17 +55,22 @@ public class MRKMeansReducer extends Reducer<IntWritable, PointWritable, Text, T
 
             System.out.println("Saving intermediate centers....");
 
+            int written=0;
             for (PointWritable p : values) {
                 centers.add(p.point);
                 context.getCounter(Counters.INTERMEDIATE_CENTERS).increment(1);
                 writer.write(IOUtil.PointToString(p.point) + "\n");
                 localWriter.write(IOUtil.PointToString(p.point) + "\n");
+                written++;
+                if(written%100000==0)
+                    System.out.print(".");
             }
+
 
             writer.close();
             localWriter.close();
 
-            System.out.printf("Written %d intermediate centers.\n", centers.size());
+            System.out.printf("\nWritten %d intermediate centers.\n", centers.size());
             System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
             t0 = System.nanoTime();
 
@@ -81,7 +86,8 @@ public class MRKMeansReducer extends Reducer<IntWritable, PointWritable, Text, T
                 System.out.println("Hush! recursing....");
                 StreamKMeansPlusPlusClusterer streamKMeansPlusPlusClusterer=new StreamKMeansPlusPlusClusterer("/tmp/centers.txt");
                 streamKMeansPlusPlusClusterer.verbose=true;
-                List<CentroidCluster<DoublePoint>> clusters=streamKMeansPlusPlusClusterer.cluster(k,k*100,1,3);
+                int _chunksize=Math.min(k*100,k*100);
+                List<CentroidCluster<DoublePoint>> clusters=streamKMeansPlusPlusClusterer.cluster(k,_chunksize,1,1);
                 for (CentroidCluster<DoublePoint> cluster : clusters)
                     context.write(new Text(IOUtil.PointToString(cluster.getCenter().getPoint())), new Text(""));
             }
