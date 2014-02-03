@@ -55,6 +55,7 @@ public class Main extends Configured implements Tool {
         options.addOption("kmeanspp", false, "use kmeans++.");
         options.addOption("kmeans", false, "use standard kmeans.");
         options.addOption("stream", false, "use stream kmeans++.");
+        options.addOption("mrkmeans", false, "use serial mrkmeans.");
         options.addOption("mapreduce", false, "use Hadoop ;p");
         options.addOption("generate", false, "generate random data.");
         options.addOption("evaluate", true, "Evaluate the clustering using the centers in the file.");
@@ -219,14 +220,14 @@ public class Main extends Configured implements Tool {
                 System.out.println("Options:");
                 System.out.println("\tk: "+k);
                 System.out.println("\ttries per chunk: "+tries);
-                System.out.println("\tmax iterations per chunk: "+ max);
+                //System.out.println("\tmax iterations per chunk: "+ max);
                 System.out.println("\tinput: "+ input_path);
                 System.out.println("\toutput: "+ output_path);
 
                 StreamKMeansPlusPlusClusterer streamKMeansPlusPlus = new StreamKMeansPlusPlusClusterer(input_path);
                 if (verbose)
                     streamKMeansPlusPlus.verbose = true;
-                clusters = streamKMeansPlusPlus.cluster(k, chunk_size, max, tries);
+                clusters = streamKMeansPlusPlus.cluster(k, chunk_size, tries);
 
                 System.out.printf("Algorithm Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
                 t0=System.nanoTime();
@@ -245,6 +246,57 @@ public class Main extends Configured implements Tool {
                 System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
                 System.exit(0);
             }
+
+
+            if (line.hasOption("mrkmeans")) { //mrkmeans
+                System.out.println("Using serial mrkmeans algorithm.");
+
+                if (!line.hasOption("t"))
+                    tries = 1;
+                if (!line.hasOption("m"))
+                    max = 1;
+
+                if (!line.hasOption("i"))
+                    exit("An input file must be given!");
+
+                if (!line.hasOption("k"))
+                    exit("Number of clusters must be given.");
+
+                if (!line.hasOption("c"))
+                    exit("Chunk size must be given.");
+
+                System.out.println("Options:");
+                System.out.println("\tk: "+k);
+                System.out.println("\ttries per chunk: "+tries);
+                //System.out.println("\tmax iterations per chunk: "+ max);
+                System.out.println("\tinput: "+ input_path);
+                System.out.println("\toutput: "+ output_path);
+
+                MRKMeansClusterer mrkMeansClusterer=new MRKMeansClusterer(input_path);
+                // streamKMeansPlusPlus = new StreamKMeansPlusPlusClusterer(input_path);
+                if (verbose)
+                    mrkMeansClusterer.verbose = true;
+                clusters = mrkMeansClusterer.cluster(k, chunk_size,max, tries);
+
+                System.out.printf("Algorithm Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
+                t0=System.nanoTime();
+
+                if (line.hasOption("p")) {
+                    for (CentroidCluster<DoublePoint> center : clusters)
+                        System.out.println(center.getCenter());
+                }
+
+                if (line.hasOption("sse")) {
+                    System.out.println("Evaluating clusters...");
+                    System.out.printf("ICD is: %g\n", Evaluator.computeICD(clusters));
+                    System.out.printf("SSE is: %g\n", Evaluator.computeSSE(clusters, input_path));
+                }
+
+                System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
+                System.exit(0);
+            }
+
+
 
             //mapreduce
             if (line.hasOption("mapreduce")) { //stream kmeans++

@@ -15,30 +15,29 @@ import java.util.List;
  * Time: 2:56 PM
  * To change this template use File | Settings | File Templates.
  */
-public class StreamKMeansPlusPlusClusterer {
+public class MRKMeansClusterer {
     public boolean verbose = false;
     String path;
     List<ClusterPoint> intermediateClusterPoints = new ArrayList<ClusterPoint>();
 
-    public StreamKMeansPlusPlusClusterer(String path) {
+    public MRKMeansClusterer(String path) {
         this.path = path;
     }
 
-    public List<CentroidCluster<DoublePoint>> cluster(int k, int chunk_size, int tries) throws IOException {
-        int klogk = k * (int) (Math.log(k) + 1) * 3;
+    public List<CentroidCluster<DoublePoint>> cluster(int k, int chunk_size, int chunk_iters, int tries) throws IOException {
         if (verbose) {
             System.out.println("The chunk size is: " + chunk_size);
-            System.out.println("Tries for intermediate: " + tries);
-            System.out.println("Centers per chunk: " + klogk);
+            System.out.println("Iterations per chunk is: " + chunk_iters);
+            System.out.println("tries for intermediate: " + tries);
         }
         CSVReader csvReader = new CSVReader(path);
         List<DoublePoint> points;
-
+        int chunk_number = 0;
         do {
             points = csvReader.readNextPoints(chunk_size);
             if (points.size() == 0 || points.size() < k)
                 break;
-            MultiKMeansPlusPlus multiKMeansPlusPlus = new MultiKMeansPlusPlus(klogk, 1, tries);
+            MultiKMeansPlusPlus multiKMeansPlusPlus = new MultiKMeansPlusPlus(k, chunk_iters, tries);
             List<CentroidCluster<DoublePoint>> clusters = multiKMeansPlusPlus.cluster(points);
             for (CentroidCluster<DoublePoint> cluster : clusters)
                 intermediateClusterPoints.add(new ClusterPoint(cluster));

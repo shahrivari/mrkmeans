@@ -11,6 +11,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.tmu.clustering.MRKMeansClusterer;
 import org.tmu.clustering.MultiKMeansPlusPlus;
 import org.tmu.clustering.StreamKMeansPlusPlusClusterer;
 import org.tmu.util.CSVReader;
@@ -84,10 +85,11 @@ public class MRKMeansReducer extends Reducer<IntWritable, PointWritable, Text, T
                     context.write(new Text(IOUtil.PointToString(cluster.getCenter().getPoint())), new Text(""));
             } else {
                 System.out.println("Hush! recursing....");
-                StreamKMeansPlusPlusClusterer streamKMeansPlusPlusClusterer=new StreamKMeansPlusPlusClusterer("/tmp/centers.txt");
-                streamKMeansPlusPlusClusterer.verbose=true;
+                MRKMeansClusterer mrkMeansClusterer=new MRKMeansClusterer("/tmp/centers.txt");
+                //StreamKMeansPlusPlusClusterer streamKMeansPlusPlusClusterer=new StreamKMeansPlusPlusClusterer("/tmp/centers.txt");
+                mrkMeansClusterer.verbose=true;
                 int _chunksize=Math.min(k*100,k*100);
-                List<CentroidCluster<DoublePoint>> clusters=streamKMeansPlusPlusClusterer.cluster(k,_chunksize,1,1);
+                List<CentroidCluster<DoublePoint>> clusters=mrkMeansClusterer.cluster(k,_chunksize,1,3);
                 for (CentroidCluster<DoublePoint> cluster : clusters)
                     context.write(new Text(IOUtil.PointToString(cluster.getCenter().getPoint())), new Text(""));
             }
