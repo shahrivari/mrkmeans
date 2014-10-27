@@ -8,6 +8,7 @@ import org.tmu.util.CSVReader;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -140,6 +141,32 @@ public class Evaluator {
 
         return icd;
     }
+
+    public static void printClusterAssigns(List<CentroidCluster<DoublePoint>> clusters, String file_path) throws IOException {
+        EuclideanDistance euclideanDistance = new EuclideanDistance();
+        CSVReader csvReader = new CSVReader(file_path);
+        List<DoublePoint> points = csvReader.readNextPoints(10000);
+        while (points.size() > 0) {
+            for (DoublePoint point : points) {
+                double best_distance = Double.MAX_VALUE;
+                int cluster_num=0;
+                int index=0;
+                for (CentroidCluster<DoublePoint> cluster : clusters) {
+                    Clusterable center = cluster.getCenter();
+                    double distance = euclideanDistance.compute(center.getPoint(), point.getPoint());
+                    if (distance < best_distance){
+                        best_distance = distance;
+                        cluster_num=index;
+                    }
+                    index++;
+                }
+                System.out.println(cluster_num+"\t "+ Arrays.toString(point.getPoint()));
+            }
+            points = csvReader.readNextPoints(10000);
+        }
+        csvReader.close();
+    }
+
 
 
 }

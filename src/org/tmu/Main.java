@@ -41,6 +41,7 @@ public class Main extends Configured implements Tool {
     static int max = 40;
     static boolean verbose = false;
     static boolean print = false;
+    static boolean printClusterAssignments = false;
 
     static CommandLineParser parser = new BasicParser();
     //System.in.read();
@@ -64,6 +65,7 @@ public class Main extends Configured implements Tool {
         options.addOption("k", "k", true, "the number of clusters.");
         options.addOption("t", "tries", true, "try x times and return the best.");
         options.addOption("p", "print", false, "print the final centers.");
+        options.addOption("ca", false, "print cluster assignments.");
         options.addOption("m", "max", true, "the max iterations / per chunk iteration for the stream case / max dimension length fot generate.");
         options.addOption("c", "chunk", true, "the chunk size.");
         options.addOption("d", "dimension", true, "number of dimensions of data (for generating only)");
@@ -85,6 +87,8 @@ public class Main extends Configured implements Tool {
                 max = Integer.parseInt(line.getOptionValue("m"));
             if (line.hasOption("p"))
                 print = true;
+            if (line.hasOption("ca"))
+                printClusterAssignments = true;
             if (line.hasOption("k"))
                 k = Integer.parseInt(line.getOptionValue("k"));
             if (line.hasOption("c"))
@@ -140,6 +144,10 @@ public class Main extends Configured implements Tool {
                 if (line.hasOption("p")) {
                     for (CentroidCluster<DoublePoint> center : clusters)
                         System.out.println(center.getCenter());
+                    System.out.print("Cluster Counts: ");
+                    for (CentroidCluster<DoublePoint> center : clusters)
+                        System.out.print(center.getPoints().size()+" ");
+                    System.out.println();
                 }
 
                 if (line.hasOption("sse")) {
@@ -147,6 +155,10 @@ public class Main extends Configured implements Tool {
                     System.out.printf("ICD is: %g\n", Evaluator.computeICD(clusters));
                     System.out.printf("SSE is: %g\n", Evaluator.computeSSE(clusters, input_path));
                 }
+
+                if (printClusterAssignments)
+                    Evaluator.printClusterAssigns(clusters,input_path);
+
 
                 System.out.printf("Evaluation Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
                 System.exit(0);
@@ -189,6 +201,10 @@ public class Main extends Configured implements Tool {
                 if (print) {
                     for (CentroidCluster<DoublePoint> center : clusters)
                         System.out.println(center.getCenter());
+                    System.out.print("Cluster Counts: ");
+                    for (CentroidCluster<DoublePoint> center : clusters)
+                        System.out.print(center.getPoints().size() + " ");
+                    System.out.println();
                 }
 
                 if (line.hasOption("sse")) {
@@ -196,6 +212,10 @@ public class Main extends Configured implements Tool {
                     System.out.printf("ICD is: %g\n", Evaluator.computeICD(clusters));
                     System.out.printf("SSE is: %g\n", Evaluator.computeSSE(clusters, input_path));
                 }
+
+                if (printClusterAssignments)
+                    Evaluator.printClusterAssigns(clusters,input_path);
+
                 System.exit(0);
             }
 
@@ -235,6 +255,10 @@ public class Main extends Configured implements Tool {
                 if (line.hasOption("p")) {
                     for (CentroidCluster<DoublePoint> center : clusters)
                         System.out.println(center.getCenter());
+                    System.out.print("Cluster Counts: ");
+                    for (CentroidCluster<DoublePoint> center : clusters)
+                        System.out.print(center.getPoints().size()+" ");
+                    System.out.println();
                 }
 
                 if (line.hasOption("sse")) {
@@ -242,6 +266,9 @@ public class Main extends Configured implements Tool {
                     System.out.printf("ICD is: %g\n", Evaluator.computeICD(clusters));
                     System.out.printf("SSE is: %g\n", Evaluator.computeSSE(clusters, input_path));
                 }
+
+                if (printClusterAssignments)
+                    Evaluator.printClusterAssigns(clusters,input_path);
 
                 System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
                 System.exit(0);
@@ -284,6 +311,10 @@ public class Main extends Configured implements Tool {
                 if (line.hasOption("p")) {
                     for (CentroidCluster<DoublePoint> center : clusters)
                         System.out.println(center.getCenter());
+                    System.out.print("Cluster Counts: ");
+                    for (CentroidCluster<DoublePoint> center : clusters)
+                        System.out.print(center.getPoints().size()+" ");
+                    System.out.println();
                 }
 
                 if (line.hasOption("sse")) {
@@ -291,6 +322,9 @@ public class Main extends Configured implements Tool {
                     System.out.printf("ICD is: %g\n", Evaluator.computeICD(clusters));
                     System.out.printf("SSE is: %g\n", Evaluator.computeSSE(clusters, input_path));
                 }
+
+                if (printClusterAssignments)
+                    Evaluator.printClusterAssigns(clusters,input_path);
 
                 System.out.printf("Took %,d Milliseconds\n", (System.nanoTime() - t0) / 1000000);
                 System.exit(0);
